@@ -3,18 +3,47 @@ $pathsToCheck = @(
     "./package/Config",
     "./package/Content",
     "./package/Resources",
-    "./package/Shaders",
-    "./package/Source"
+    "./package/Shaders"
 )
+
+
+Write-Host "Do you want to include the source code?"
+Write-Host "1. yes"
+Write-Host "2. no"
+$selection = Read-Host "Enter the number of your choice:"
+
+$Source = ""
+switch ($selection) {
+    1 {
+        $pathsToCheck + "./package/Source"
+        $Source = "_Source"
+    }
+    2 {
+
+    }
+    default {
+        Write-Host "Invalid selection. Please choose 1 or 2."
+        Read-Host -Prompt "Press Enter to exit"
+        exit
+    }
+}
 
 
 # Search for a .uplugin file in the current directory and subdirectories
 $upluginFile = Get-ChildItem -Path . -Recurse -Filter *.uplugin | Select-Object -First 1
 
+$VersionName = "_"
+$EngineVersion = "_"
 # Check if a .uplugin file was found
 if ($upluginFile) {
     # Get the full path of the .uplugin file
     $upluginFullPath = $upluginFile.FullName
+
+    $upluginContent = Get-Content -Path $upluginFullPath -Raw | ConvertFrom-Json
+    # Extract the VersionName
+    $VersionName = $upluginContent.VersionName
+    $EngineVersion = $upluginContent.EngineVersion
+
     $pathsToCheck += $upluginFullPath
 } else {
     Write-Host "No .uplugin file found."
@@ -34,8 +63,9 @@ foreach ($path in $pathsToCheck) {
 
 # Compress the valid paths if any were found
 if ($validPaths.Count -gt 0) {
-    Compress-Archive -Path $validPaths -DestinationPath "Release.zip"
-    Write-Host "Archive created: Release.zip"
+    $zipname = "Voxy_UE${EngineVersion}_v${VersionName}_${Source}.zip"
+    Compress-Archive -Path $validPaths -DestinationPath $zipname
+    Write-Host "Archive created: $zipname"
 } else {
     Write-Host "No valid paths found to archive."
 }
