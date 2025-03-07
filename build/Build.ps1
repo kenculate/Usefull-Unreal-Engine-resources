@@ -1,10 +1,13 @@
+# version 0.3
 # Define options
 $option1 = "E:\Works\Unreal\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat"
 $option2 = "E:\Works\Unreal\UE_5.4\Engine\Build\BatchFiles\RunUAT.bat"
+$option3 = "E:\Works\Unreal\UE_5.5\Engine\Build\BatchFiles\RunUAT.bat"
 
 Write-Host "Please select an UE Version:"
 Write-Host "1. $option1"
 Write-Host "2. $option2"
+Write-Host "3. $option3"
 $selection = Read-Host "Enter the number of your choice:"
 
 switch ($selection) {
@@ -13,6 +16,9 @@ switch ($selection) {
     }
     2 {
         $RunUATPath = $option2
+    }
+    3 {
+        $RunUATPath = $option3
     }
     default {
         Write-Host "Invalid selection. Please choose 1 or 2."
@@ -33,5 +39,9 @@ if ($upluginFile) {
     Write-Host "No .uplugin file found."
 }
 
+if (Test-Path "./Binaries") {
+    Remove-Item "./Binaries" -Recurse -Force
+}
+cp -r ./package/Binaries ./Binaries
 # Keep the terminal open
 Read-Host -Prompt "Press Enter to exit"
