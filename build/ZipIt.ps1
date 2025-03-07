@@ -1,3 +1,4 @@
+# version 0.3
 # Array of folders and files to check
 $pathsToCheck = @(
     "./package/Config",
@@ -15,10 +16,12 @@ $selection = Read-Host "Enter the number of your choice:"
 $Source = ""
 switch ($selection) {
     1 {
-        $pathsToCheck + "./package/Source"
-        $Source = "_Source"
+        $pathsToCheck += "./package/Source"
+        $Source = "Source"
     }
     2 {
+        $pathsToCheck += "./package/Binaries"
+        $Source = "Binaries"
 
     }
     default {
@@ -28,10 +31,11 @@ switch ($selection) {
     }
 }
 
-
+Write-Host $pathsToCheck
 # Search for a .uplugin file in the current directory and subdirectories
 $upluginFile = Get-ChildItem -Path . -Recurse -Filter *.uplugin | Select-Object -First 1
 
+$FriendlyName = ""
 $VersionName = "_"
 $EngineVersion = "_"
 # Check if a .uplugin file was found
@@ -41,6 +45,7 @@ if ($upluginFile) {
 
     $upluginContent = Get-Content -Path $upluginFullPath -Raw | ConvertFrom-Json
     # Extract the VersionName
+    $FriendlyName = $upluginContent.FriendlyName
     $VersionName = $upluginContent.VersionName
     $EngineVersion = $upluginContent.EngineVersion
 
@@ -63,7 +68,8 @@ foreach ($path in $pathsToCheck) {
 
 # Compress the valid paths if any were found
 if ($validPaths.Count -gt 0) {
-    $zipname = "Voxy_UE${EngineVersion}_v${VersionName}_${Source}.zip"
+
+    $zipname = "${FriendlyName}_UE${EngineVersion}_v${VersionName}_${Source}.zip"
     Compress-Archive -Path $validPaths -DestinationPath $zipname
     Write-Host "Archive created: $zipname"
 } else {
